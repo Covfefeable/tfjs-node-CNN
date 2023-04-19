@@ -1,19 +1,21 @@
 import * as tf from '@tensorflow/tfjs-node';
 import fs from 'fs';
+import path from 'path';
 import { MODELPATH, STRMAP, imgToTensor, labelToStr, strToLabel } from './const';
+import axios from 'axios';
 
 const IMAGEWIDTH = 80;
 const IMAGEHEIGHT = 34;
 
 const train = async () => {
-    // 导入 ../images/train 内的所有验证码
-    const validationImages = fs.readdirSync('./images/train');
+    // 导入 ../images/new-train 内的所有验证码
+    const validationImages = fs.readdirSync('./images/new-train');
     // labels 用于存储验证码的标签
     const labels: number[][] = [];
     const validationImagesPath = validationImages.map((image) => {
         const label = image.split('.')[0]
         labels.push(strToLabel(label));
-        return `./images/train/${image}`;
+        return `./images/new-train/${image}`;
     });
     const xs = tf.concat(validationImagesPath.map((image) => {
         return imgToTensor(image);
@@ -79,7 +81,7 @@ const train = async () => {
         // 训练模型
         await model.fit(xs, ys, {
             batchSize: 32,
-            epochs: 1,
+            epochs: 10,
             validationSplit: 0.1,
             // @ts-ignore
             onEpochEnd: async (epoch: any, logs: any) => {
@@ -97,7 +99,16 @@ const train = async () => {
     await model.save(MODELPATH);
 
     // 使用模型预测
-    const testImage = imgToTensor('./images/validation/origin-test1.jpg');
+    const { data } = await axios.get('http://sso.upuphone.com:8090/esc-sso/api/v1/image/getRandcode', {
+        responseType: 'arraybuffer'
+    });
+    const base64 = Buffer.from(data, 'binary').toString('base64');
+    const image = base64.replace(/^data:image\/\w+;base64,/, '');
+    const imageBuffer = Buffer.from(image, 'base64');
+    const fileName = `test.jpg`;
+    fs.writeFileSync(path.join('./images/validation', fileName), imageBuffer);
+
+    const testImage = imgToTensor('./images/validation/test.jpg');
     const predictOut = model.predict(testImage) as tf.Tensor;
     console.log('预测结果：', labelToStr(Array.from(predictOut.dataSync())));
     return labelToStr(Array.from(predictOut.dataSync()));
