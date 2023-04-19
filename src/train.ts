@@ -97,21 +97,7 @@ const train = async () => {
 
     // 保存模型
     await model.save(MODELPATH);
-
-    // 使用模型预测
-    const { data } = await axios.get('http://sso.upuphone.com:8090/esc-sso/api/v1/image/getRandcode', {
-        responseType: 'arraybuffer'
-    });
-    const base64 = Buffer.from(data, 'binary').toString('base64');
-    const image = base64.replace(/^data:image\/\w+;base64,/, '');
-    const imageBuffer = Buffer.from(image, 'base64');
-    const fileName = `test.jpg`;
-    fs.writeFileSync(path.join('./images/validation', fileName), imageBuffer);
-
-    const testImage = imgToTensor('./images/validation/test.jpg');
-    const predictOut = model.predict(testImage) as tf.Tensor;
-    console.log('预测结果：', labelToStr(Array.from(predictOut.dataSync())));
-    return labelToStr(Array.from(predictOut.dataSync()));
+    return 'success';
 
 }
 

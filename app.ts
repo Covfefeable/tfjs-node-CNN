@@ -1,6 +1,7 @@
 import Express from 'express'
 import cookieParser from 'cookie-parser';
 import bodyParser from 'body-parser';
+import path from 'path';
 
 import * as tf from '@tensorflow/tfjs-node';
 import fs from 'fs';
@@ -8,6 +9,7 @@ import fs from 'fs';
 import train from './src/train';
 import { imgToTensor, labelToStr } from './src/const';
 import { getRandcode } from './src/get-image';
+import axios from 'axios';
 let app = Express();
 let PORT = 3000;
 
@@ -18,8 +20,18 @@ app.use(cookieParser());
 app.get('/', async (req, res) => {
     // 加载./model里面的模型
     const model = await tf.loadLayersModel('file://./model/model.json');
-    // 预测
-    const testImage = imgToTensor('./images/validation/test.jpg');
+
+    // 使用模型预测
+    const { data } = await axios.get('http://sso.upuphone.com:8090/esc-sso/api/v1/image/getRandcode', {
+        responseType: 'arraybuffer'
+    });
+    const base64 = Buffer.from(data, 'binary').toString('base64');
+    const image = base64.replace(/^data:image\/\w+;base64,/, '');
+    const imageBuffer = Buffer.from(image, 'base64');
+    const fileName = `test.jpg`;
+    fs.writeFileSync(path.join('./images/test', fileName), imageBuffer);
+
+    const testImage = imgToTensor('./images/test/test.jpg');
     const a = await model.predict(testImage) as tf.Tensor;
     res.send(labelToStr(Array.from(a.dataSync())));
 });
