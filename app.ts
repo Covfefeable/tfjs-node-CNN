@@ -6,6 +6,7 @@ import * as tf from '@tensorflow/tfjs-node';
 import fs from 'fs';
 
 import train from './src/train';
+import { imgToTensor, labelToStr } from './src/const';
 let app = Express();
 let PORT = 3000;
 
@@ -14,9 +15,12 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 
 app.get('/', async (req, res) => {
-    const a = tf.oneHot(tf.tensor([[1, 2, 3, 4], [2, 3, 4, 5]]).cast('int32'), 36).reshape([2, 4, 36]);
-    console.log(a, a.shape)
-    res.send(a.dataSync());
+    // 加载./model里面的模型
+    const model = await tf.loadLayersModel('file://./model/model.json');
+    // 预测
+    const testImage = imgToTensor('./images/validation/origin-test3.jpg');
+    const a = await model.predict(testImage) as tf.Tensor;
+    res.send(labelToStr(Array.from(a.dataSync())));
 });
 
 app.get('/train', async (req, res) => {
