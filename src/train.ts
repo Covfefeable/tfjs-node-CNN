@@ -1,7 +1,7 @@
 import * as tf from '@tensorflow/tfjs-node';
 import fs from 'fs';
 import path from 'path';
-import { MODELPATH, STRMAP, imgToTensor, labelToStr, strToLabel } from './const';
+import { MODELPATH, imgToTensor, strToLabel } from './const';
 import axios from 'axios';
 
 const IMAGEWIDTH = 80;
