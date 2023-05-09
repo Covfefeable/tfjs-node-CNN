@@ -21,8 +21,8 @@ app.get('/', async (req, res) => {
     // 加载./model里面的模型
     const model = await tf.loadLayersModel('file://./model/model.json');
 
-    // 使用模型预测
-    const { data } = await axios.get('http://sso.upuphone.com:8090/esc-sso/api/v1/image/getRandcode', {
+    // 抓取一张图片并使用模型预测
+    const { data } = await axios.get('https://xxx.com/api/v1/image/getRandcode', {
         responseType: 'arraybuffer'
     });
     const base64 = Buffer.from(data, 'binary').toString('base64');
@@ -37,8 +37,7 @@ app.get('/', async (req, res) => {
 });
 
 app.get('/train', async (req, res) => {
-    const r = await train()
-    // @ts-ignore
+    const r = await train();
     res.send(r);
 });
 
