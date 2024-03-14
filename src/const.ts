@@ -41,3 +41,5 @@ export const labelToStr = (label: number[]) => {
 }
 
 export const MODELPATH = 'file://./model'
+
+export const IMAGEDATASETPATH = './images/dataset/';
