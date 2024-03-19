@@ -2,26 +2,28 @@ import * as tf from "@tensorflow/tfjs-node";
 import fs from "fs";
 import path from "path";
 import {
-  IMAGEDATASETPATH,
-  MODELPATH,
   imgToTensor,
   labelToStr,
   strToLabel,
 } from "./const";
 
-const IMAGEWIDTH = 80;
-const IMAGEHEIGHT = 34;
+const config = {
+  dataSetPath: "./images/dataset/",
+  modelPath: "file://./model",
+  imageWidth: 80,
+  imageHeight: 34,
+}
 
 const train = async () => {
   // 导入所有验证码数据集
-  const imagesDataset = fs.readdirSync(IMAGEDATASETPATH);
+  const imagesDataset = fs.readdirSync(config.dataSetPath);
   // labels 用于存储验证码的标签
   const labels: number[][] = [];
 
   const imagesPathArr = imagesDataset.map((image) => {
     const label = image.split(".")[0];
     labels.push(strToLabel(label));
-    return `${IMAGEDATASETPATH}${image}`;
+    return `${config.dataSetPath}${image}`;
   });
 
   const xs = tf.concat(
@@ -40,7 +42,7 @@ const train = async () => {
   const model = tf.sequential();
   model.add(
     tf.layers.conv2d({
-      inputShape: [IMAGEHEIGHT, IMAGEWIDTH, 1],
+      inputShape: [config.imageHeight, config.imageWidth, 1],
       kernelSize: 3,
       filters: 8,
       strides: 1,
@@ -122,12 +124,12 @@ const train = async () => {
   }
 
   // 保存模型
-  await model.save(MODELPATH);
+  await model.save(config.modelPath);
   return "success";
 };
 
 const predict = async (imageBase64: string) => {
-  const model = await tf.loadLayersModel("file://./model/model.json");
+  const model = await tf.loadLayersModel(`${config.modelPath}/model.json`);
 
   const image = imageBase64.replace(/^data:image\/\w+;base64,/, "");
   const imageBuffer = Buffer.from(image, "base64");

@@ -1,17 +1,12 @@
 import Express from "express";
 import cookieParser from "cookie-parser";
 import bodyParser from "body-parser";
-import path from "path";
-
-import * as tf from "@tensorflow/tfjs-node";
-import fs from "fs";
 
 import { predict, train } from "./src/train";
-import { imgToTensor, labelToStr } from "./src/const";
 import axios from "axios";
 
-let app = Express();
-let PORT = 3000;
+const app = Express();
+const Port = 3000;
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
@@ -33,7 +28,7 @@ app.get("/predict", async (req, res) => {
   res.send(result);
 });
 
-app.set("port", PORT || 3000);
+app.set("port", Port || 3000);
 app.listen(app.get("port"), function () {
   console.log("Express server listening...");
 });
