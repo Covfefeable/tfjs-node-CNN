@@ -8,7 +8,7 @@ import {
 } from "./const";
 
 const config = {
-  dataSetPath: "./images/dataset/",
+  dataSetPath: "./images/new-train/",
   modelPath: "file://./model",
   imageWidth: 80,
   imageHeight: 34,
