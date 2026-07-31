@@ -33,7 +33,6 @@ const train = async () => {
   );
   const ys = tf
     .oneHot(tf.tensor(labels).cast("int32"), 36)
-    .reshape([imagesDataset.length, 144])
     .cast("float32");
 
   console.log(xs.shape, ys.shape);
@@ -93,9 +92,10 @@ const train = async () => {
   model.add(
     tf.layers.dense({
       units: 144,
-      activation: "softmax",
     })
   );
+  model.add(tf.layers.reshape({ targetShape: [4, 36] }));
+  model.add(tf.layers.softmax({ axis: -1 }));
 
   // 编译模型
   model.compile({
